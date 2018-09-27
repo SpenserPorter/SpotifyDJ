@@ -71,6 +71,10 @@ THIRD_PARTY_APPS = [
 ]
 LOCAL_APPS = [
     'spotifydj.users.apps.UsersAppConfig',
+    'api.apps.ApiConfig',
+    'oauth2client',
+    'requests_oauthlib',
+    'oauthlib'
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
