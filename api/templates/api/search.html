@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if form %}
+    <form action="{% url "search" %}" method="post">
+        {% csrf_token %}
+          {{ form }}
+        <input type='submit' value='Search'>
+    </form>
+    {% endif %}
+    {% if results %}
+        {{results}}
+    {% endif %}
+{% endblock %}

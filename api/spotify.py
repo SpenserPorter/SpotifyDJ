@@ -1,24 +1,26 @@
-from .models import ClientToken
+#from .models import ClientToken
+from api.oauth2 import SpotifyClientCredentials
 
 
 class SpotifyAPI(object):
 
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
+        self.session = SpotifyClientCredentials()
+        self.prefix = 'https://api.spotify.com/v1/'
+        self.session.get_new_token()
 
-    def init_session(self):
-        if ClienToken.load()
     def get(self, url, query, **kwargs):
+        response = self.session.request(url, q=query)
+        return response
 
-        response = self.session.request(url, )
+    def search_track(self, query, types, limit):
+        q = self.prepare_query(query, types, limit)
+        url = self.prefix + 'search?' + q
+        response = self.session.request(method='GET', url=url)
+        return response
 
-    def search_track(self, query, max_results=10):
-        q = prepaire_query(query)
-        type = 'track'
-
-        self.session.request(method='GET', url='https://api.spotify.com/v1/search', query)
-
-
-    def prepare_query(query):
+    @staticmethod
+    def prepare_query(query, types, limit):
         query = query.replace(' ', '%20')
+        query = 'q=' + query + '&type=' + ','.join(types) + '&limit=' + str(limit)
         return query

@@ -4,5 +4,6 @@ from api import views
 
 urlpatterns = [
     path("callback/", views.callback, name="callback"),
-    path("authorize/", views.authorize, name="authorize")
+    path("authorize/", views.authorize, name="authorize"),
+    path("search/", views.search, name="search")
 ]

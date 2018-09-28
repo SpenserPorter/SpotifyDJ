@@ -1,7 +1,6 @@
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
-from api.models import UserToken
 import datetime as dt
 import os
 
@@ -22,20 +21,11 @@ class SpotifyClientCredentials(object):
         auth = self.create_auth()
         client = self.create_client()
         self.token = self.session.fetch_token(
-                                    token_url=TOKEN_URL,
+                                    token_url=self.TOKEN_URL,
                                     auth=auth,
                                     client=client
                                     )
         return self.token
-
-    def to_token_model(self, token):
-        access_token = token['access_token']
-        token_type = token['token_type']
-        expires_at = token['expires_at']
-        scope = token['scope']
-        refresh_token = token['refresh_token']
-        client_token = ClientToken.create(access_token, token_type, scope, expires_at)
-        client_token.save()
 
     def create_oauth_session(self):
         client = self.create_client()
@@ -79,12 +69,12 @@ class SpotifyUserAuth(object):
         session = OAuth2Session(
                             client_id=self.client_id,
                             redirect_uri=self.redirect_uri,
-                            auto_refresh_url=self.TOKEN_URL,
                             scope=self.scope,
-                            auto_refresh_kwargs=auth,
-                            token_updater=self.token_updater
                             )
         return session
+
+    def get_token(self):
+        return self.session.token
 
     def get_auth_url_and_state(self):
         authorization_url, state = self.session.authorization_url(self.AUTHORIZE_URL_BASE)
@@ -97,22 +87,7 @@ class SpotifyUserAuth(object):
                                     auth=auth,
                                     code=code
                                     )
-
-
-    def save_token(self):
-        self.token_updater(self.session.token)
-
-    def token_persister(self, token):
-        access_token = token['access_token']
-        token_type = token['token_type']
-        expires_at = token['expires_at']
-        scope = token['scope']
-        refresh_token = token['refresh_token']
-        user_token = UserToken.create(self.user, access_token, token_type,
-                    scope, expires_at, refresh_token
-                    )
-        user_token.save()
-
+        return token
 
     def create_auth(self):
         auth = HTTPBasicAuth(self.client_id, self.client_secret)
