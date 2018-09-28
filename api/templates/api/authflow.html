@@ -1,0 +1,10 @@
+{% extends base.html %}
+    {% block content %}
+        {% if auth_url %}
+        <a href={{auth_url}}><h1> Log into spotify you bitch </h1></a>
+        {% endif %}
+
+        {% if status %}
+        <h1> {{status}} </h1>
+        {% endif %}
+    {% endblock %}

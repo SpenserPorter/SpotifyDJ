@@ -1,12 +1,13 @@
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
+from api.models import UserToken
 import datetime as dt
 import os
 
 client_id = os.getenv('SPOTIFY_CLIENT_ID')
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-redirect_uri = 'http://127.0.0.1:8000/'
+redirect_uri = 'http://127.0.0.1:8000/callback/'
 
 class SpotifyClientCredentials(object):
     TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -26,6 +27,15 @@ class SpotifyClientCredentials(object):
                                     client=client
                                     )
         return self.token
+
+    def to_token_model(self, token):
+        access_token = token['access_token']
+        token_type = token['token_type']
+        expires_at = token['expires_at']
+        scope = token['scope']
+        refresh_token = token['refresh_token']
+        client_token = ClientToken.create(access_token, token_type, scope, expires_at)
+        client_token.save()
 
     def create_oauth_session(self):
         client = self.create_client()
@@ -47,7 +57,7 @@ class SpotifyClientCredentials(object):
         return response
 
     def is_token_expired(self):
-        if self.session.token['expires_at'] <= dt.datetime.now().timestamp():
+        if self.session.token['expires_at'] <= dt.datetime.utcnow().timestamp():
             return True
         return False
 
@@ -55,8 +65,9 @@ class SpotifyUserAuth(object):
     AUTHORIZE_URL_BASE = 'https://accounts.spotify.com/authorize'
     TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-    def __init__(self, client_id=client_id, client_secret=client_secret,
+    def __init__(self, user, client_id=client_id, client_secret=client_secret,
                 redirect_uri=redirect_uri, scope=['']):
+        self.user = user
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
@@ -64,11 +75,14 @@ class SpotifyUserAuth(object):
         self.session = self.create_session()
 
     def create_session(self):
+        auth = self.create_auth()
         session = OAuth2Session(
                             client_id=self.client_id,
                             redirect_uri=self.redirect_uri,
                             auto_refresh_url=self.TOKEN_URL,
                             scope=self.scope,
+                            auto_refresh_kwargs=auth,
+                            token_updater=self.token_updater
                             )
         return session
 
@@ -83,7 +97,22 @@ class SpotifyUserAuth(object):
                                     auth=auth,
                                     code=code
                                     )
-        return token
+
+
+    def save_token(self):
+        self.token_updater(self.session.token)
+
+    def token_persister(self, token):
+        access_token = token['access_token']
+        token_type = token['token_type']
+        expires_at = token['expires_at']
+        scope = token['scope']
+        refresh_token = token['refresh_token']
+        user_token = UserToken.create(self.user, access_token, token_type,
+                    scope, expires_at, refresh_token
+                    )
+        user_token.save()
+
 
     def create_auth(self):
         auth = HTTPBasicAuth(self.client_id, self.client_secret)
