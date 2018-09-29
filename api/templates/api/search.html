@@ -9,6 +9,10 @@
     </form>
     {% endif %}
     {% if results %}
-        {{results}}
+        {% for result in results %}
+        <li>
+             Track: <a href="{{result.preview_url}}">{{result.name}}</a> Artists: {% for artist in result.album.artists %}{{artist.name}} {% endfor %}
+        </li>
+        {% endfor %}
     {% endif %}
 {% endblock %}

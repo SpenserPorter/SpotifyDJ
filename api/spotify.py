@@ -1,26 +1,35 @@
-#from .models import ClientToken
-from api.oauth2 import SpotifyClientCredentials
-
+from .models import ClientToken, UserToken
+from api.oauth2 import SpotifyClientCredentials, SpotifyUserAuth
+import json
 
 class SpotifyAPI(object):
 
-    def __init__(self):
-        self.session = SpotifyClientCredentials()
+    def __init__(self, user):
+        self.session = SpotifyUserAuth(user, token=UserToken.get_token(user))
         self.prefix = 'https://api.spotify.com/v1/'
-        self.session.get_new_token()
-
-    def get(self, url, query, **kwargs):
-        response = self.session.request(url, q=query)
-        return response
-
-    def search_track(self, query, types, limit):
-        q = self.prepare_query(query, types, limit)
-        url = self.prefix + 'search?' + q
-        response = self.session.request(method='GET', url=url)
-        return response
 
     @staticmethod
-    def prepare_query(query, types, limit):
-        query = query.replace(' ', '%20')
-        query = 'q=' + query + '&type=' + ','.join(types) + '&limit=' + str(limit)
+    def prepare_params(values):
+        query_params = ''
+        for name, value in values.items():
+            if name == 'type':
+                value = ','.join(value)
+            query_params += '&' + name + '=' + str(value)
+        return query_params
+
+    @staticmethod
+    def prepare_query(query):
+        query = query.replace(' ', '+')
+        query = 'q=' + query
         return query
+
+    def search_track(self, query, **kwargs):
+        if kwargs:
+            params = self.prepare_params(kwargs)
+        else:
+            params = ''
+        q = self.prepare_query(query)
+        url = self.prefix + 'search?' + q + params
+        response = self.session.request(method='GET', url=url)
+        json_string = response.text
+        return json.loads(json_string)

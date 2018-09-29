@@ -11,11 +11,10 @@ redirect_uri = 'http://127.0.0.1:8000/callback/'
 class SpotifyClientCredentials(object):
     TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
-    def __init__(self, client_id=client_id, client_secret=client_secret):
+    def __init__(self, client_id=client_id, client_secret=client_secret, token={}):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.session = self.create_oauth_session()
-        self.get_new_token()
+        self.session = self.create_oauth_session(token=token)
 
     def get_new_token(self):
         auth = self.create_auth()
@@ -27,9 +26,9 @@ class SpotifyClientCredentials(object):
                                     )
         return self.token
 
-    def create_oauth_session(self):
+    def create_oauth_session(self, token):
         client = self.create_client()
-        return OAuth2Session(client=client)
+        return OAuth2Session(client=client, token=token)
 
     def create_client(self):
         client = BackendApplicationClient(client_id=self.client_id)
@@ -47,7 +46,7 @@ class SpotifyClientCredentials(object):
         return response
 
     def is_token_expired(self):
-        if self.session.token['expires_at'] <= dt.datetime.utcnow().timestamp():
+        if self.session.token['expires_at'] <= dt.datetime.now().timestamp():
             return True
         return False
 
@@ -56,25 +55,28 @@ class SpotifyUserAuth(object):
     TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
     def __init__(self, user, client_id=client_id, client_secret=client_secret,
-                redirect_uri=redirect_uri, scope=['']):
+                redirect_uri=redirect_uri, scope=None, token={}):
         self.user = user
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.scope = scope
-        self.session = self.create_session()
+        self.scope = ['user-modify-playback-state', 'playlist-modify-public', 'user-read-playback-state'] if scope is None else scope
+        self.session = self.create_session(token=token)
 
-    def create_session(self):
+    def create_session(self, token):
         auth = self.create_auth()
         session = OAuth2Session(
                             client_id=self.client_id,
                             redirect_uri=self.redirect_uri,
-                            scope=self.scope,
+                            token=token,
+                            scope=self.scope
                             )
         return session
 
-    def get_token(self):
-        return self.session.token
+    def request(self, method, url):
+        method = method.upper()
+        response = self.session.request(method=method, url=url)
+        return response
 
     def get_auth_url_and_state(self):
         authorization_url, state = self.session.authorization_url(self.AUTHORIZE_URL_BASE)
@@ -88,6 +90,17 @@ class SpotifyUserAuth(object):
                                     code=code
                                     )
         return token
+
+    def get_token(self):
+        return self.session.token
+
+    def refresh_token(self):
+        auth = self.create_auth()
+        new_token = self.session.refresh_token(
+                                    token_url=self.TOKEN_URL,
+                                    auth=auth,
+                                    )
+        return new_token
 
     def create_auth(self):
         auth = HTTPBasicAuth(self.client_id, self.client_secret)
