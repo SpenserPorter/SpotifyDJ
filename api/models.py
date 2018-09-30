@@ -2,6 +2,38 @@ from django.db import models
 from spotifydj.users.models import User
 import datetime as dt
 from . import oauth2
+import uuid
+
+class Party(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    host = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @classmethod
+    def create(cls, host):
+        return cls(host=host)
+
+class Playlist(models.Model):
+    name = models.CharField(max_length=64)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='playlists')
+
+    @classmethod
+    def create(cls, name, party):
+        return cls(name=name, party=party)
+
+class Song(models.Model):
+    uri = models.CharField(max_length=64)
+    name = models.CharField(max_length=255)
+    artist = models.CharField(max_length=255)
+    album = models.CharField(max_length=255)
+    added_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='songs')
+
+    @classmethod
+    def create(cls, uri, name, artist, album, added_by, playlist):
+        return cls(uri=uri, name=name, artist=artist, album=album, added_by=added_by, playlist=playlist)
+
+    def __str__(self):
+        return self.name
 
 class UserToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

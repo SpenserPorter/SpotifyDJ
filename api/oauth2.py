@@ -73,9 +73,10 @@ class SpotifyUserAuth(object):
                             )
         return session
 
-    def request(self, method, url):
+    def request(self, method, url, data=None):
         method = method.upper()
-        response = self.session.request(method=method, url=url)
+        response = self.session.request(method=method, url=url, data=data)
+        response.raise_for_status()
         return response
 
     def get_auth_url_and_state(self):
