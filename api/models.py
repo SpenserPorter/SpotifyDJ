@@ -25,15 +25,31 @@ class Song(models.Model):
     name = models.CharField(max_length=255)
     artist = models.CharField(max_length=255)
     album = models.CharField(max_length=255)
-    added_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    added_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='songs')
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='songs')
+    created_at = models.DateTimeField(auto_now_add=True)
+    score = models.IntegerField(default=0)
 
     @classmethod
     def create(cls, uri, name, artist, album, added_by, playlist):
         return cls(uri=uri, name=name, artist=artist, album=album, added_by=added_by, playlist=playlist)
 
+    def modify_score(self, amount):
+        self.score += amount
+        self.save()
+        return self.score
+
     def __str__(self):
         return self.name
+
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='voted_songs')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='voted')
+    vote = models.BooleanField()
+
+    @classmethod
+    def create(cls, user, song, vote):
+        return cls(user=user, song=song, vote=vote)
 
 class UserToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

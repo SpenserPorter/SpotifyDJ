@@ -61,7 +61,7 @@ class SpotifyAPI(object):
 
     def play_tracks(self, uris, device_id=None, **kwargs):
         if device_id:
-            params = {'device_id':device_id}
+            params = {'device_id': device_id}
             query_params = self.prepare_params(params)
         else:
             query_params = ''
@@ -73,7 +73,6 @@ class SpotifyAPI(object):
         else:
             track_uri = self.prepare_uri(uris, type='track')
             track_uri_list = [track_uri]
-
         payload = {
             'uris': track_uri_list
         }

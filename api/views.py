@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
-from .models import UserToken, UserGrant, Party, Playlist, Song
+from .models import UserToken, UserGrant, Party, Playlist, Song, Vote
 from .forms import SearchBox, AddTrack, JoinParty, NewParty
+from spotifydj.users.models import User
 from . import oauth2
 from api.spotify import SpotifyAPI
 
@@ -65,18 +66,46 @@ def party(request, party_id=None):
     if party_id:
         listening_party = Party.objects.filter(id=party_id).get()
         playlist = listening_party.playlists.get()
-        songs_list = []
+        song_list = []
+        vote_list = []
+        user_list = []
         if playlist.songs.exists():
-            songs_list = list(playlist.songs.all())
+            song_list = playlist.songs.all().order_by('-score', 'created_at')
+            vote_list = song_list.filter(voted__user=request.user)
+            user_list = User.objects.filter(songs__in=song_list).distinct().order_by('-karma')
         context = {
             'party_id': party_id,
             'party_host': listening_party.host,
             'playlist': playlist,
-            'songs_list': songs_list
+            'song_list': song_list,
+            'vote_list': vote_list,
+            'user_list': user_list
         }
     return render(request, 'api/party.html', context)
 
-def add(request, uri, party_id):
+def vote(request, party_id, song_id):
+    vote = request.POST['vote']
+    if vote == 'Snack':
+        vote = True
+        points = 1
+    elif vote == 'Whack':
+        vote = False
+        points = -1
+    the_party = Party.objects.filter(id=party_id).get()
+    playlist = the_party.playlists.get()
+    song = playlist.songs.filter(id=song_id).get()
+    song.modify_score(points)
+    add_karma_to_user(user=song.added_by, karma_amount=points)
+    cast_vote = Vote.create(request.user, song, vote)
+    cast_vote.save()
+    return redirect(party, party_id=party_id)
+
+def add_karma_to_user(user, karma_amount):
+    user.karma += karma_amount
+    user.save()
+    return user.karma
+
+def add_song_to_party(request, uri, party_id):
     party_obj = Party.objects.filter(id=party_id).get()
     playlist = party_obj.playlists.get()
     spotify = SpotifyAPI(user=request.user, token=UserToken.get_token(request.user))
@@ -92,9 +121,10 @@ def add(request, uri, party_id):
                 song_artist,
                 song_album,
                 song_added_by,
-                playlist
+                playlist,
                 )
     song.save()
+
     return redirect(party, party_id=party_id)
 
 def search(request, query=None, party_id=None):

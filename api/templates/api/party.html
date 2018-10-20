@@ -14,15 +14,57 @@
 
     {% endif %}
     {% if party_id %}
-        Party: {{party_id}} <br>
-        Host: {{party_host}} <br>
-        <a href="{% url "search" party_id %}"> Add a track! </a>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+            <form action="{% url "search" party_id %}" method="POST">
+                {% csrf_token %}
+                <input type='submit' name='Add' value='Add a Track'></input>
+            </form>
+            </div>
+            <div class="col-6">
+                Party: {{party_id}}
+            </div>
+            <div class="col">
+                Host: {{party_host}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <table class="table table-striped table-sm">
+                    <caption>DJ List</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                DJ
+                            </th>
+                            <th scope="col">
+                                Karma
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in user_list %}
+                        <tr>
+                            <td>
+                                {{user}}
+                            </td>
+                            <td>
+                                {{user.karma}}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        <div class="col-sm">
         <table class="table table-striped table-sm">
             <caption>Playlist</caption>
             <thead>
                 <tr>
-                    <th scope="col">
-                        Added By
+                    <th>
+                        Votes
                     </th>
                     <th scope="col">
                         Track
@@ -33,13 +75,24 @@
                     <th scope="col">
                         Album
                     </th>
+                    <th scope="col">
+                        Added By
+                    </th>
                 </tr>
             </thead>
             <tbody>
-            {% for song in songs_list %}
+            {% for song in song_list %}
                 <tr>
                     <td>
-                        {{song.added_by}}
+                        {% if song in vote_list %}
+                            {{song.score}}
+                        {% else %}
+                            <form action="{% url "vote" party_id song.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type='submit' name='vote' value='Snack'></input>
+                                <input type='submit' name='vote' value='Whack'></input>
+                            </form>
+                        {% endif %}
                     </td>
                     <td>
                         {{song.name}}
@@ -50,8 +103,13 @@
                     <td>
                         {{song.album}}
                     </td>
+                    <td>
+                        {{song.added_by}}
+                    </td>
             {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
     {% endif %}
 {% endblock %}
