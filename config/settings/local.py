@@ -1,10 +1,11 @@
 from .base import *  # noqa
 from .base import env
+import os
 
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = True
+DEBUG = 'False'
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='PlyrYekcPPbcixxxn1lg0vBqvPJQTQCOqFFOkLUFM7IK2Mxk7Rs5DlBWPLzecBVr')
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
@@ -12,6 +13,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "0.0.0.0",
     "127.0.0.1",
+    "ec2-3-209-12-17.compute-1.amazonaws.com"
 ]
 
 # CACHES
@@ -52,7 +54,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TEMPLATE_CONTEXT': True,
 }
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
-INTERNAL_IPS = ['127.0.0.1', '10.0.2.2']
+INTERNAL_IPS = ['127.0.0.1', '10.0.2.2', "ec2-3-209-12-17.compute-1.amazonaws.com"]
 
 
 # django-extensions

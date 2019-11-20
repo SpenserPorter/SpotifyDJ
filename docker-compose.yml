@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  django:
+    build:
+        context: .
+    command: "python manage.py runserver 0.0.0.0:8000"
+    ports:
+        - 8000:8000
+    environment:
+        - DATABASE_URL=postgres://spenser:lolwut@ec2-3-209-12-17.compute-1.amazonaws.com:5432/spotifydj
+        - SPOTIFY_CLIENT_ID=74a48b722f94471ca6bb684bd5732d69
+        - SPOTIFY_CLIENT_SECRET=f4d0278b2c1844aa9bca31e92df402dc
