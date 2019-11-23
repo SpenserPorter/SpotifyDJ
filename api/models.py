@@ -29,6 +29,7 @@ class Song(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='songs')
     created_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
+    played = models.BooleanField(default=False)
 
     @classmethod
     def create(cls, uri, name, artist, album, added_by, playlist):

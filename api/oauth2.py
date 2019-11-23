@@ -1,12 +1,13 @@
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
+from config.settings.base import env
 import datetime as dt
 import os
 
-client_id = os.getenv('SPOTIFY_CLIENT_ID')
-client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-redirect_uri = 'http://127.0.0.1:8000/callback/'
+client_id = env('SPOTIFY_CLIENT_ID')
+client_secret = env('SPOTIFY_CLIENT_SECRET')
+redirect_uri = env('SPOTIFY_REDIRECT_URI')
 
 class SpotifyClientCredentials(object):
     TOKEN_URL = 'https://accounts.spotify.com/api/token'
