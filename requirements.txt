@@ -30,7 +30,7 @@ coverage==4.5.1
 daphne==2.2.2
 decorator==4.3.0
 defusedxml==0.5.0
-Django==2.0.8
+Django==2.0.12
 django-allauth==0.37.1
 django-coverage-plugin==1.6.0
 django-crispy-forms==1.7.2
@@ -42,7 +42,7 @@ django-model-utils==3.1.2
 django-redis==4.9.0
 django-ses==0.8.12
 django-storages==1.8
-djangorestframework==3.8.2
+djangorestframework==3.9.1
 docutils==0.14
 factory-boy==2.11.1
 Faker==0.9.1
@@ -75,7 +75,7 @@ packaging==17.1
 parso==0.3.1
 pexpect==4.6.0
 pickleshare==0.7.4
-Pillow==5.2.0
+Pillow==6.2.0
 pluggy==0.7.1
 poyo==0.4.1
 prompt-toolkit==1.0.15
@@ -98,7 +98,7 @@ python-slugify==1.2.6
 python3-openid==3.1.0
 pytz==2018.5
 redis==2.10.6
-requests==2.19.1
+requests==2.20.0
 requests-oauthlib==1.0.0
 rsa==4.0
 simplegeneric==0.8.1
@@ -116,8 +116,8 @@ typed-ast==1.1.0
 Unidecode==1.0.22
 update==0.0.1
 uritemplate==3.0.0
-urllib3==1.23
+urllib3==1.24.2
 wcwidth==0.1.7
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 whichcraft==0.4.1
 zope.interface==4.6.0
