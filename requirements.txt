@@ -15,7 +15,7 @@ backcall==0.1.0
 binaryornot==0.4.4
 boto==2.49.0
 boto3==1.10.25
-certifi==2018.8.24
+certifi==2022.12.7
 cffi==1.11.5
 channels==2.1.5
 channels-redis==2.3.1
